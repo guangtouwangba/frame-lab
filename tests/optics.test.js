@@ -31,9 +31,9 @@ test("untrusted setup cannot inject content or out-of-range values", () => {
     dof: "false",
   });
   assert.equal(s.focal, 135);
-  assert.equal(s.aperture, 1.4);
+  assert.equal(s.aperture, 1.2);
   assert.equal(s.aspect, "2:3");
-  assert.equal(s.skin, "#c99478");
+  assert.equal(s.skin, "#ffffff");
   assert.equal(s.dof, true);
   assert.throws(() => sanitize(null));
 });

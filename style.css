@@ -620,3 +620,25 @@ dialog p {
     animation: none;
   }
 }
+.equipment-note {
+  white-space: pre-line;
+  font-size: 11px;
+  line-height: 1.8;
+  color: #cfc7bb;
+  background: #242722;
+  border-left: 2px solid #b08c67;
+  padding: 11px 12px;
+  border-radius: 3px;
+  margin: 18px 0 22px;
+}
+.control-section a {
+  color: #d9b28c;
+  text-underline-offset: 3px;
+}
+.control input:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.stage-label span {
+  overflow-wrap: anywhere;
+}

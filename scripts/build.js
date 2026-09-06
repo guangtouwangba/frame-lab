@@ -1,5 +1,5 @@
 import { build } from "esbuild";
-import { mkdir, copyFile, rm } from "node:fs/promises";
+import { mkdir, copyFile, rm, cp } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -22,6 +22,9 @@ for (const path of [
   "dist/app.js",
   "LICENSE",
   "THREE-LICENSE.txt",
+  "SOURCES.md",
+  "ASSETS.md",
 ])
   await copyFile(resolve(root, path), resolve(out, path));
+await cp(resolve(root, "assets"), resolve(out, "assets"), { recursive: true });
 console.log("Built static site/ and offline-compatible dist/app.js");

@@ -1,5 +1,5 @@
 import { createServer } from "node:http";
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import { dirname, resolve, extname } from "node:path";
 import { fileURLToPath } from "node:url";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../site");
@@ -10,12 +10,24 @@ const files = new Set([
   "/dist/app.js",
   "/LICENSE",
   "/THREE-LICENSE.txt",
+  "/SOURCES.md",
+  "/ASSETS.md",
 ]);
+for (const file of await readdir(resolve(root, "assets"), {
+  recursive: true,
+})) {
+  if (/\.(gltf|bin|png|json)$/.test(file)) files.add("/assets/" + file);
+}
 const types = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
   ".txt": "text/plain; charset=utf-8",
+  ".md": "text/plain; charset=utf-8",
+  ".gltf": "model/gltf+json",
+  ".bin": "application/octet-stream",
+  ".png": "image/png",
+  ".json": "application/json",
 };
 const server = createServer(async (req, res) => {
   const path = new URL(req.url, "http://localhost").pathname;

@@ -3,7 +3,16 @@ import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { ShaderPass } from "three/addons/postprocessing/ShaderPass.js";
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
-import { makeModel } from "./model.js";
+import { makePortrait } from "./portrait.js";
+import { makeEnvironment, environments } from "./environment.js";
+import {
+  cameras,
+  lenses,
+  compatibleLenses,
+  constrainEquipment,
+  sensorFor,
+  cropFactor,
+} from "./equipment.js";
 import {
   defaults,
   ranges,
@@ -57,7 +66,23 @@ renderer.toneMapping = T.ACESFilmicToneMapping;
 renderer.outputColorSpace = T.SRGBColorSpace;
 const scene = new T.Scene(),
   camera = new T.PerspectiveCamera(40, 2 / 3, 0.08, 60);
-const model = makeModel();
+let modelReady = false;
+const modelLoadTimer = setTimeout(() => {
+  if (!modelReady)
+    $("#status").textContent = "模型加载超过 20 秒，请检查连接或刷新重试";
+}, 20000);
+const model = makePortrait(() => {
+  clearTimeout(modelLoadTimer);
+  modelReady = true;
+  update();
+  $("#status").textContent = "摄影棚已就绪 · CC0 三维模特";
+  $("#shutter").disabled = false;
+});
+model.ready.catch(() => {
+  clearTimeout(modelLoadTimer);
+  $("#status").textContent = "精细模特加载失败 · 显示简化人偶";
+  toast("模特资源未能加载，请刷新重试。当前为简化预览。");
+});
 scene.add(model.root);
 scene.add(new T.HemisphereLight(0xbecbda, 0x60554b, 0.6));
 const floor = new T.Mesh(
@@ -74,49 +99,8 @@ const wall = new T.Mesh(
 wall.position.y = 6;
 wall.receiveShadow = true;
 scene.add(wall);
-const decor = new T.Group();
-scene.add(decor);
-function box(x, y, z, w, h, d, color) {
-  const m = new T.Mesh(
-    new T.BoxGeometry(w, h, d),
-    new T.MeshStandardMaterial({ color, roughness: 0.85 }),
-  );
-  m.position.set(x, y, z);
-  m.castShadow = true;
-  m.receiveShadow = true;
-  decor.add(m);
-  return m;
-}
-box(-1.3, 0.5, 0, 0.42, 1, 0.42, 0xaaa896);
-box(-1.3, 1.18, 0, 0.18, 0.34, 0.18, 0x333f36);
-for (let i = 0; i < 8; i++) {
-  const leaf = new T.Mesh(
-    new T.SphereGeometry(1, 12, 8),
-    new T.MeshStandardMaterial({
-      color: i % 2 ? 0x455b3f : 0x647655,
-      roughness: 1,
-    }),
-  );
-  leaf.position.set(
-    -1.3 + Math.sin(i * 2) * 0.2,
-    1.35 + i * 0.07,
-    Math.cos(i * 2) * 0.15,
-  );
-  leaf.scale.set(0.17, 0.04, 0.09);
-  leaf.rotation.z = i * 0.5;
-  decor.add(leaf);
-}
-box(1.3, 1.45, 0, 0.07, 2.9, 0.06, 0xddd6c3);
-box(1.7, 1.45, 0, 0.07, 2.9, 0.06, 0xddd6c3);
-box(1.5, 2.86, 0, 0.47, 0.07, 0.06, 0xddd6c3);
-for (let i = 0; i < 5; i++) {
-  const orb = new T.Mesh(
-    new T.SphereGeometry(0.035, 12, 10),
-    new T.MeshBasicMaterial({ color: 0xffd6a0 }),
-  );
-  orb.position.set(0.72 + i * 0.17, 2.3 + Math.sin(i) * 0.17, -0.1);
-  decor.add(orb);
-}
+const environment = makeEnvironment();
+scene.add(environment.root);
 function spot(color) {
   const l = new T.SpotLight(color, 70, 25, Math.PI / 3, 0.7, 2);
   l.castShadow = true;
@@ -187,7 +171,16 @@ function val(k) {
     : `${["m", "EV"].includes(u) ? v.toFixed(2) : v}${u ? " " + u : ""}`;
 }
 function slider(k) {
-  return `<label class="control"><span>${labels[k][0]}<output id="out-${k}">${val(k)}</output></span><input aria-label="${labels[k][0]}" data-key="${k}" type="range" min="${ranges[k][0]}" max="${ranges[k][1]}" step="${labels[k][2]}" value="${state[k]}"></label>`;
+  const lens = lenses[state.lensId];
+  const range =
+    k === "focal"
+      ? lens.focal
+      : k === "aperture"
+        ? lens.aperture
+        : k === "focus"
+          ? [lens.minFocus, 14]
+          : ranges[k];
+  return `<label class="control"><span>${labels[k][0]}<output id="out-${k}">${val(k)}</output></span><input aria-label="${labels[k][0]}" data-key="${k}" type="range" min="${range[0]}" max="${range[1]}" step="${labels[k][2]}" value="${state[k]}" ${range[0] === range[1] ? "disabled" : ""}></label>`;
 }
 function check(k, text) {
   return `<label class="check"><input type="checkbox" data-key="${k}" ${state[k] ? "checked" : ""}>${text}</label>`;
@@ -212,7 +205,15 @@ const lessons = {
 function controls() {
   let html = "";
   if (currentTab === "camera")
-    html = `<h2>镜头与机位</h2>${slider("focal")}${slider("distance")}${slider("height")}${slider("yaw")}${slider("pitch")}${slider("pan")}${slider("tilt")}${slider("roll")}<h2>景深与取景</h2>${slider("aperture")}${check("dof", "开启景深预览")}${check("autoFocus", "自动对焦面部")}${slider("focus")}${slider("ev")}${select(
+    html = `<h2>选择你的器材</h2>${select(
+      "cameraId",
+      "相机机身",
+      Object.entries(cameras).map(([id, c]) => [id, c.name]),
+    )}${select(
+      "lensId",
+      "镜头",
+      compatibleLenses(state.cameraId).map(([id, l]) => [id, l.name]),
+    )}<div class="equipment-note" id="equipment-note"></div><h2>镜头与机位</h2>${slider("focal")}${slider("distance")}${slider("height")}${slider("yaw")}${slider("pitch")}${slider("pan")}${slider("tilt")}${slider("roll")}<h2>景深与取景</h2>${slider("aperture")}${check("dof", "开启景深预览")}${check("autoFocus", "自动对焦面部")}${slider("focus")}${slider("ev")}${select(
       "grid",
       "辅助线",
       [
@@ -220,14 +221,21 @@ function controls() {
         ["center", "中心十字"],
         ["none", "关闭"],
       ],
-    )}<p>焦距改变视角；透视由机位决定。光圈控制景深，亮度由曝光补偿控制。</p>`;
+    )}<p>定焦镜头锁定焦距；更换机身保持机位不变。使用上方景别按钮可重新取景。自动曝光预览：光圈改变景深，曝光补偿控制亮度。</p><p>准确参数：画幅、视角、焦距 / 光圈范围、最近对焦限制。近似：薄透镜景深与实时散景。未模拟品牌色彩、噪点、像差、呼吸效应、防抖与实机分辨率。<a href="SOURCES.md" target="_blank" rel="noopener">规格来源与边界 ↗</a></p>`;
   if (currentTab === "light")
     html = `<h2>布光起点</h2><div class="presets"><button data-light="soft">柔和侧光</button><button data-light="split">侧面分割</button><button data-light="butterfly">正面高光</button><button data-light="rim">逆光轮廓</button></div>${slider("keyAngle")}${slider("keyHeight")}${slider("keyPower")}${slider("fillPower")}${slider("rimPower")}${slider("softness")}${color("keyColor", "主光颜色")}<p>灯光强度为模拟相对值。三盏灯会产生真实几何阴影；软化滑块调整阴影滤波，不代表柔光箱物理尺寸。</p>`;
   if (currentTab === "scene")
-    html = `<h2>模特与背景</h2>${select("pose", "姿态", [
+    html = `<h2>肖像与空间</h2>${select("modelId", "模特", [
+      ["mira", "Mira · 长发"],
+      ["noah", "Noah · 短发"],
+    ])}${select(
+      "environment",
+      "三维布景",
+      Object.entries(environments).map(([id, e]) => [id, e.name]),
+    )}${select("pose", "姿态", [
       ["relaxed", "自然站姿"],
       ["hip", "单手扶腰"],
-    ])}${slider("modelYaw")}<div class="two">${color("skin", "肤色")}${color("shirt", "上衣颜色")}</div>${color("backdrop", "背景颜色")}${slider("bgDistance")}${check("decor", "显示背景道具")}<p>原创风格化三维模特，身高约 1.82 m。背景道具用于观察构图、透视和景深。</p>`;
+    ])}${slider("modelYaw")}<div class="two">${color("skin", "肤色调色")}${color("shirt", "服装调色")}</div>${color("backdrop", "背景颜色")}${slider("bgDistance")}${check("decor", "显示背景道具")}<p>Quaternius CC0 风格化人物，约 1.8 m，非真人扫描。保留面部结构、发型、服装与手指；肤色调色叠加在原始材质上。布景是三维几何体，改变机位会改变透视。<a href="ASSETS.md" target="_blank" rel="noopener">模型来源 ↗</a></p>`;
   if (currentTab === "learn")
     html = `<h2>一次练一个变量</h2>${select("lesson", "练习主题", [
       ["free", "自由拍摄"],
@@ -250,8 +258,14 @@ function controls() {
               ? Number(el.value)
               : el.value;
         if (k === "focus") state.autoFocus = false;
+        if (k === "environment") {
+          state.backdrop = environments[state.environment].wall;
+          state.shirt = environments[state.environment].cloth;
+        }
+        constrainEquipment(state);
         update();
-        if (k === "lesson") controls();
+        if (["lesson", "cameraId", "lensId", "environment"].includes(k))
+          controls();
       }),
     );
   $("#controls")
@@ -323,6 +337,16 @@ function controls() {
       controls();
       toast("练习起点已载入");
     };
+  updateEquipmentReadout();
+}
+function updateEquipmentReadout() {
+  const c = cameras[state.cameraId],
+    l = lenses[state.lensId],
+    s = c.sensor,
+    g = gate(aspect(), s);
+  const node = $("#equipment-note");
+  if (node)
+    node.textContent = `传感器 ${s[0]} × ${s[1]} mm · ${cropFactor(s).toFixed(2)}× 裁切系数\n当前取景门 ${g.w.toFixed(2)} × ${g.h.toFixed(2)} mm · 等效约 ${(state.focal * cropFactor(s)).toFixed(0)} mm（裁切前）\n最近对焦 ${l.minFocus.toFixed(2)} m · ${l.focal[0] === l.focal[1] ? "定焦" : "变焦"}镜头`;
 }
 let lastPose = "",
   dirty = true;
@@ -331,9 +355,13 @@ function aspect() {
   return a / b;
 }
 function update() {
+  document
+    .querySelectorAll("[data-shot]")
+    .forEach((b) => b.classList.remove("active"));
+  constrainEquipment(state);
   const a = aspect();
   camera.aspect = a;
-  camera.fov = verticalFov(state.focal, a);
+  camera.fov = verticalFov(state.focal, a, sensorFor(state));
   camera.updateProjectionMatrix();
   const yaw = T.MathUtils.degToRad(state.yaw),
     pitch = T.MathUtils.degToRad(state.pitch);
@@ -357,22 +385,24 @@ function update() {
   model.root.rotation.y = T.MathUtils.degToRad(state.modelYaw);
   model.skin.color.set(state.skin);
   model.cloth.color.set(state.shirt);
+  model.update(state.modelId);
   if (lastPose !== state.pose) {
     model.pose(state.pose === "hip");
     lastPose = state.pose;
   }
-  const face = model.root.localToWorld(new T.Vector3(0, 1.66, 0.095));
+  model.root.updateMatrixWorld(true);
+  const face = model.root.localToWorld(model.face.clone());
   if (state.autoFocus)
     state.focus = clamp(
       face.clone().applyMatrix4(camera.matrixWorldInverse).z * -1,
-      0.4,
+      lenses[state.lensId].minFocus,
       14,
     );
   wall.position.z = -state.bgDistance;
   wall.material.color.set(state.backdrop);
   scene.background = new T.Color(state.backdrop);
-  decor.position.z = -state.bgDistance + 0.35;
-  decor.visible = state.decor;
+  environment.update(state.environment, state.bgDistance, state.decor);
+  floor.material.color.set(environments[state.environment].floor);
   const ka = T.MathUtils.degToRad(state.keyAngle);
   key.position.set(2.5 * Math.sin(ka), state.keyHeight, 2.5 * Math.cos(ka));
   key.intensity = state.keyPower;
@@ -384,15 +414,24 @@ function update() {
   Object.assign(dof.uniforms.focus, { value: state.focus });
   dof.uniforms.focal.value = state.focal / 1000;
   dof.uniforms.aperture.value = state.aperture;
-  dof.uniforms.sensorW.value = gate(a).w / 1000;
+  dof.uniforms.sensorW.value = gate(a, sensorFor(state)).w / 1000;
   dof.uniforms.aspect.value = a;
   dof.uniforms.enabled.value = state.dof ? 1 : 0;
   $("#aspect").value = state.aspect;
   $("#grid").className = state.grid;
   $("#read-focal").textContent = state.focal + " mm";
+  $("#equipment-caption").textContent =
+    `${cameras[state.cameraId].name} · ${lenses[state.lensId].name}`;
   $("#read-aperture").textContent = "f/" + state.aperture.toFixed(1);
   $("#read-focus").textContent = state.focus.toFixed(2) + " m";
-  const d = depthOfField(state.focal, state.aperture, state.focus);
+  const g = gate(a, sensorFor(state));
+  const d = depthOfField(
+    state.focal,
+    state.aperture,
+    state.focus,
+    Math.hypot(g.w, g.h) / 1500,
+  );
+  updateEquipmentReadout();
   $("#read-dof").textContent =
     d.near.toFixed(2) +
     "–" +
@@ -422,17 +461,21 @@ function frameShot(name) {
     full: [0.91, 2.12],
   };
   const [y, h] = shots[name];
-  state.distance = clamp((h * state.focal) / gate(aspect()).h, 0.65, 10);
+  state.distance = clamp(
+    (h * state.focal) / gate(aspect(), sensorFor(state)).h,
+    0.65,
+    10,
+  );
   state.height = y;
   state.pitch = 0;
   state.pan = 0;
   state.tilt = 0;
   state.roll = 0;
   state.autoFocus = true;
+  update();
   document
     .querySelectorAll("[data-shot]")
     .forEach((b) => b.classList.toggle("active", b.dataset.shot === name));
-  update();
   controls();
 }
 function drawMap() {
@@ -618,14 +661,16 @@ view.onpointerup = (e) => {
       ),
       ray = new T.Raycaster();
     ray.setFromCamera(mouse, camera);
-    const hit = ray
-      .intersectObjects(scene.children, true)
-      .find((h) => h.object.isMesh);
+    const hit = ray.intersectObjects(scene.children, true).find((h) => {
+      if (!h.object.isMesh) return false;
+      for (let p = h.object; p; p = p.parent) if (!p.visible) return false;
+      return true;
+    });
     if (hit) {
       state.autoFocus = false;
       state.focus = clamp(
         -hit.point.clone().applyMatrix4(camera.matrixWorldInverse).z,
-        0.4,
+        lenses[state.lensId].minFocus,
         14,
       );
       update();
@@ -649,7 +694,7 @@ view.addEventListener(
 );
 let shooting = false;
 async function shoot() {
-  if (shooting) return;
+  if (shooting || !modelReady) return;
   shooting = true;
   $("#shutter").disabled = true;
   try {
@@ -710,7 +755,7 @@ function gallery() {
       selected = s;
       $("#photo-preview").src = s.url;
       $("#photo-meta").textContent =
-        `${s.time} · ${s.w} × ${s.h} · ${s.state.focal} mm · f/${s.state.aperture} · 机位 ${s.state.distance.toFixed(2)} m · 对焦 ${s.state.focus.toFixed(2)} m · EV ${s.state.ev}`;
+        `${s.time} · ${s.w} × ${s.h} · ${cameras[s.state.cameraId].name} + ${lenses[s.state.lensId].name} · ${s.state.focal} mm · f/${s.state.aperture} · 机位 ${s.state.distance.toFixed(2)} m · 对焦 ${s.state.focus.toFixed(2)} m · EV ${s.state.ev} · ${s.state.modelId} · ${environments[s.state.environment].name}`;
       $("#photo-dialog").showModal();
     };
     $("#gallery").append(b);
@@ -765,5 +810,5 @@ update();
 resize();
 render();
 animate();
-$("#shutter").disabled = false;
-$("#status").textContent = "本地摄影棚已就绪";
+$("#shutter").disabled = !modelReady;
+if (!modelReady) $("#status").textContent = "正在加载三维模特…";

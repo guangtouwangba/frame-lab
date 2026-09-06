@@ -27,12 +27,12 @@
           <div class="pills" id="framing">
             <button data-shot="close">特写</button
             ><button data-shot="bust">近景</button
-            ><button data-shot="half" class="active">半身</button
+            ><button data-shot="half">半身</button
             ><button data-shot="full">全身</button>
           </div>
           <label
             >画幅
-            <select id="aspect">
+            <select id="aspect" aria-label="画幅">
               <option>2:3</option>
               <option>3:2</option>
               <option>1:1</option>
@@ -52,7 +52,7 @@
             <div id="view-error" role="alert" hidden></div>
           </div>
           <div class="stage-label">
-            实时取景 <span>静态人像 · 全画幅长边 36 mm</span>
+            实时取景 <span id="equipment-caption">按机身传感器取景</span>
           </div>
         </div>
         <div class="readouts">
@@ -138,8 +138,7 @@
       </p>
       <p>
         模拟边界：这是风格化三维人物，景深采用薄透镜弥散圆与屏幕空间散景近似。曝光补偿单独控制亮度，光圈仅控制景深；未模拟快门拖影、ISO
-        噪声、真实皮肤散射和镜头像差。取景画幅以传感器长边 36 mm 为基准，非 3:2
-        比例为自定义画幅。
+        噪声、真实皮肤散射和镜头像差。取景按所选机身传感器尺寸计算，非原生比例在传感器内裁切。相机品牌不代表已复刻厂商色彩或实机画质。
       </p>
     </dialog>
     <div id="toast" role="status"></div>

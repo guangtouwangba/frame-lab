@@ -1,0 +1,25 @@
+{
+  "revision": "d65cd213cffb9c0ef17e3f70a6a46ea82ba47dfa",
+  "source": "https://raw.githubusercontent.com/lord3nd3r/ffxi-browser/d65cd213cffb9c0ef17e3f70a6a46ea82ba47dfa/public/models/chars/",
+  "sha256": {
+    "Superhero_Female_FullBody.gltf": "9b96164fc05fa7cfa7c13d51c7b9a3b78142c909ccb43d2243a0ca40ae252eda",
+    "Superhero_Female_FullBody.bin": "3a8220a485b33d05d879115a50697728b45a151781106033afb8b8c243fca208",
+    "Superhero_Male_FullBody.gltf": "a37630d7302ea48ed650b95b217a54f2b0ee440789a8da3dd81711741d6d6398",
+    "Superhero_Male_FullBody.bin": "459003f9745853ae562a85506a2b94dd56515c1f37728f9fa3d2ce1a3e4cd92f",
+    "Female_Peasant.gltf": "500238efa24d3cedeb91416efd6be877032741ba94122846b1d7fe249d92432b",
+    "Female_Peasant.bin": "40eccaa2bd545c893142ef7dca0866ea8f20df3a86c67c5615024bc4fe546e83",
+    "Male_Peasant.gltf": "6c317b2ddf216f47ac5b4b6293eae55bfad70b4987613343bd634726812aece1",
+    "Male_Peasant.bin": "e46bde795f7b69b351d322d7a5628e07131cfb48ed0afe366293f1b3f530433c",
+    "hair/Hair_Long.gltf": "dc21f2efff4f68ce3a5a9f66bf86ec4a9bfe1df41d6326ea95293eed9a3bebed",
+    "hair/Hair_Long.bin": "13996da35c7afbf8cb5097da37207ee5b7c2e2904d4ab9e2ace9843030fff8d5",
+    "hair/Hair_SimpleParted.gltf": "605eb2a8fe53e81b9d0890e9f961f2447f0c39d1a548fefb523ac546790618e4",
+    "hair/Hair_SimpleParted.bin": "57c6359703a37e346ee38a9c7ba55c8dee761c0a02da99847d06f5a91728f3cc",
+    "T_Hair_1_BaseColor.png": "1c792534135a8f91fce0de546fbfda4aa72b7fef5eeb5ed03677117879493a6a",
+    "T_Hair_2_BaseColor.png": "c666279e3a949bc76e5d08e718f69710466b489739c21678d888dc5fdc43f3be",
+    "T_Eye_Brown.png": "92f6e41623cfc964847dfdbd7092bf3a295e645daf404c0cc4e522eeb8ee1bdc",
+    "T_Superhero_Female_Dark_BaseColor.png": "51076abeacba6c01243d956c7cca15768d930789bc12f317cbd2798ed27ac800",
+    "T_Superhero_Male_Dark.png": "66b7005f5a15e26d593143d867722b3d29d8e8609ecfbf1176cdd8ae1531d0ce",
+    "T_Peasant_BaseColor.png": "14852c498a311c79ff2c272a7c48d1b5e03b037ad21a39f076c1e643138b68e3",
+    "T_Regular_Male_Dark_BaseColor.png": "74cb881a6d999f94e0db5bedf24258c75543e91f2f7840c7034091442ff46e79"
+  }
+}

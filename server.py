@@ -10,8 +10,17 @@ import urllib.parse
 import webbrowser
 
 ROOT = pathlib.Path(__file__).resolve().parent
+PUBLIC_FILES = {'/', '/index.html', '/style.css', '/layout.css', '/dist/app.js', '/SOURCES.md', '/ASSETS.md'}
+PUBLIC_FILES.update('/' + p.relative_to(ROOT).as_posix() for p in (ROOT / 'assets').rglob('*') if p.is_file() and p.suffix in ('.gltf', '.bin', '.png', '.json'))
 
 class Handler(http.server.SimpleHTTPRequestHandler):
+    def do_HEAD(self):
+        path = urllib.parse.unquote(urllib.parse.urlsplit(self.path).path)
+        if path not in PUBLIC_FILES:
+            self.send_error(404)
+            return
+        super().do_HEAD()
+
     def do_GET(self):
         path = urllib.parse.unquote(urllib.parse.urlsplit(self.path).path)
         if path == '/health':
@@ -20,7 +29,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(b'frame-lab-v1')
             return
-        if path not in ('/', '/index.html', '/style.css', '/layout.css', '/dist/app.js'):
+        if path not in PUBLIC_FILES:
             self.send_error(404)
             return
         super().do_GET()
