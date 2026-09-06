@@ -1,0 +1,29 @@
+/* Keep controls within reach while the viewfinder stays visible. */
+@media (min-width: 701px) {
+  aside {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    height: calc(100dvh - 12px);
+    display: flex;
+    flex-direction: column;
+  }
+  .tabs {
+    flex-shrink: 0;
+  }
+  #controls {
+    overflow-y: auto;
+    min-height: 0;
+    flex: 1;
+    scrollbar-color: #555d56 #1b1d1c;
+  }
+  .map-panel {
+    flex-shrink: 0;
+    padding-top: 10px;
+    padding-bottom: 8px;
+  }
+  #map {
+    max-height: 130px;
+    object-fit: contain;
+  }
+}

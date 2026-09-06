@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'"
+    />
+    <title>人像摄影练习室 · FRAME LAB</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="layout.css" />
+    <link rel="icon" href="data:," />
+  </head>
+  <body>
+    <header>
+      <div class="brand">FRAME LAB <span>人像摄影练习室</span></div>
+      <div class="head-actions">
+        <span id="status" role="status">正在启动三维摄影棚</span
+        ><button id="help">使用说明</button><button id="reset">重置场景</button>
+      </div>
+    </header>
+    <main>
+      <section class="workspace">
+        <div class="toolbar">
+          <div class="pills" id="framing">
+            <button data-shot="close">特写</button
+            ><button data-shot="bust">近景</button
+            ><button data-shot="half" class="active">半身</button
+            ><button data-shot="full">全身</button>
+          </div>
+          <label
+            >画幅
+            <select id="aspect">
+              <option>2:3</option>
+              <option>3:2</option>
+              <option>1:1</option>
+              <option>4:5</option>
+            </select></label
+          >
+        </div>
+        <div id="stage">
+          <div id="frame">
+            <canvas
+              id="view"
+              aria-label="实时人像取景器，拖动环绕，Shift 拖动平移，单击对焦"
+              tabindex="0"
+            ></canvas>
+            <div id="grid" class="thirds"></div>
+            <div id="focus-mark"></div>
+            <div id="view-error" role="alert" hidden></div>
+          </div>
+          <div class="stage-label">
+            实时取景 <span>静态人像 · 全画幅长边 36 mm</span>
+          </div>
+        </div>
+        <div class="readouts">
+          <span><small>焦距</small><b id="read-focal">65 mm</b></span
+          ><span><small>光圈</small><b id="read-aperture">f/2.8</b></span
+          ><span><small>对焦距离</small><b id="read-focus">3.60 m</b></span
+          ><span><small>景深范围（近似）</small><b id="read-dof"></b></span
+          ><button id="shutter" class="shutter" disabled>
+            拍摄照片 <kbd>空格</kbd>
+          </button>
+        </div>
+        <div class="under-view">
+          <p>拖动环绕 · Shift＋拖动平移 · 滚轮前后移动 · 点击画面对焦</p>
+          <button id="save-setup">导出方案</button
+          ><label class="file-button"
+            >导入方案<input
+              id="import-setup"
+              type="file"
+              accept=".json,application/json"
+          /></label>
+        </div>
+        <section class="contact-sheet">
+          <div class="section-title">
+            <h2>这次拍摄</h2>
+            <span id="shot-count">0 张 · 点击照片查看 / 下载</span>
+          </div>
+          <div id="gallery">
+            <p class="empty">先拍一张。换个焦距或机位，再拍一张对比。</p>
+          </div>
+        </section>
+      </section>
+      <aside>
+        <nav class="tabs" aria-label="摄影控制">
+          <button class="active" data-tab="camera">相机</button
+          ><button data-tab="light">灯光</button
+          ><button data-tab="scene">场景</button
+          ><button data-tab="learn">练习</button>
+        </nav>
+        <div id="controls"></div>
+        <div class="map-panel">
+          <h3>摄影棚俯视图</h3>
+          <canvas
+            id="map"
+            width="520"
+            height="300"
+            aria-label="模特、相机及三盏灯的平面位置"
+          ></canvas>
+          <p>橙：相机　白：模特　K：主光　F：补光　R：轮廓光</p>
+        </div>
+      </aside>
+    </main>
+    <dialog id="photo-dialog">
+      <div class="dialog-head">
+        <h2>照片回看</h2>
+        <button data-close="photo-dialog">关闭</button>
+      </div>
+      <img id="photo-preview" alt="保存的三维人像照片" />
+      <p id="photo-meta"></p>
+      <div class="dialog-actions">
+        <button id="restore-shot">恢复拍摄参数</button
+        ><button id="download-photo" class="primary">下载 PNG 原图</button>
+      </div>
+    </dialog>
+    <dialog id="help-dialog">
+      <div class="dialog-head">
+        <h2>你的第一间虚拟摄影棚</h2>
+        <button data-close="help-dialog">关闭</button>
+      </div>
+      <p>
+        先选景别，再用焦距和距离控制画面。焦距改变视角；机位与被摄体的位置关系决定透视。试试
+        35 mm 近拍和 85 mm 远拍的区别。
+      </p>
+      <p>
+        相机：拖动环绕模特；Shift＋拖动平移，滚轮前后移动。参数滑块也可完成全部操作。点击人物对焦会转为手动焦点；勾选“自动对焦面部”可重新跟随。
+      </p>
+      <p>
+        灯光：调主光角度与高度，观察鼻影、脸部明暗和轮廓。阴影软化是实时渲染近似，不等同于真实柔光箱尺寸。
+      </p>
+      <p>
+        照片：空格或“拍摄照片”保存当前取景器的无辅助线画面，长边 1600
+        px。可回看、下载 PNG、恢复参数。最多保留最近 20
+        张，刷新后照片清空；当前设置自动保存在本机浏览器，方案可导出 JSON。
+      </p>
+      <p>
+        模拟边界：这是风格化三维人物，景深采用薄透镜弥散圆与屏幕空间散景近似。曝光补偿单独控制亮度，光圈仅控制景深；未模拟快门拖影、ISO
+        噪声、真实皮肤散射和镜头像差。取景画幅以传感器长边 36 mm 为基准，非 3:2
+        比例为自定义画幅。
+      </p>
+    </dialog>
+    <div id="toast" role="status"></div>
+    <script type="module" src="dist/app.js"></script>
+    <noscript>请启用 JavaScript 以运行本地三维摄影棚。</noscript>
+  </body>
+</html>

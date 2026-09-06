@@ -1,0 +1,8 @@
+node_modules
+.git
+.env*
+.DS_Store
+site
+dist
+*-验收记录.md
+*-发布记录.md

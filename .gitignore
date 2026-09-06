@@ -1,0 +1,11 @@
+node_modules/
+__pycache__/
+.vercel/
+.env
+.env.*
+.DS_Store
+site/
+dist/
+*.log
+*-验收记录.md
+*-发布记录.md
