@@ -4,6 +4,7 @@
   "installCommand": "npm ci",
   "buildCommand": "npm test && npm run build",
   "outputDirectory": "site",
+  "functions": { "api/critique.js": { "maxDuration": 60 } },
   "headers": [
     {
       "source": "/(.*)",

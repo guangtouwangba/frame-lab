@@ -642,3 +642,58 @@ dialog p {
 .stage-label span {
   overflow-wrap: anywhere;
 }
+#coach-panel {
+  margin-top: 24px;
+  border-top: 1px solid #50534b;
+  padding-top: 20px;
+}
+#coach-panel summary {
+  cursor: pointer;
+  color: #e7b790;
+  font-size: 17px;
+  font-weight: 600;
+}
+#coach-panel .control {
+  margin: 16px 0;
+}
+#coach-panel input:not([type="checkbox"]),
+#coach-panel textarea {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  background: #171b18;
+  color: #eee;
+  border: 1px solid #565c52;
+  border-radius: 5px;
+  padding: 10px;
+  font: inherit;
+}
+#coach-panel textarea {
+  resize: vertical;
+}
+#coach-panel p {
+  font-size: 12px;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+#coach-panel .coach-privacy {
+  color: #bbbdb3;
+}
+#coach-panel .check {
+  align-items: flex-start;
+  font-size: 12px;
+  line-height: 1.6;
+}
+#coach-result {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.9;
+  font-size: 14px;
+  background: #171b18;
+  border-left: 3px solid #caa37d;
+  padding: 18px;
+  margin-top: 16px;
+}
+#coach-status {
+  color: #e7b790;
+}

@@ -18,4 +18,6 @@ test("production entry references no external scripts or styles", () => {
   );
   assert.ok(html.includes("dist/app.js"));
   assert.ok(html.includes("connect-src 'self'"));
+  assert.ok(html.includes('<option id="coach-codex-option"'));
+  assert.equal(/<\/option\s+[^>]/.test(html), false);
 });

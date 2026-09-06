@@ -115,6 +115,20 @@
         <button id="restore-shot">恢复拍摄参数</button
         ><button id="download-photo" class="primary">下载 PNG 原图</button>
       </div>
+      <details id="coach-panel">
+        <summary>AI 摄影教练 · 点评这张照片</summary>
+        <p>看构图、景别、光影和景深，给出三条可执行建议。不自动改动参数，不给人物外貌打分。</p>
+        <label class="control"><span>AI 接入方式</span><select id="coach-mode" aria-label="AI 接入方式"><option value="api">OpenAI API · 自带 key</option><option id="coach-codex-option" value="codex" disabled>本地 Codex CLI</option></select></label>
+        <p id="coach-local-note">正在检查本地/云端连接…</p>
+        <div id="coach-key-field"><label class="control"><span>API key · 仅当前页面内存</span><input id="coach-key" type="password" aria-label="API key" autocomplete="off" spellcheck="false" maxlength="512" placeholder="输入你自己的 OpenAI API key"></label><button id="coach-clear-key" type="button">清除 key</button></div>
+        <label class="control"><span>模型名称</span><input id="coach-model" aria-label="AI 模型名称" value="gpt-4.1-mini" maxlength="100" autocomplete="off" spellcheck="false"></label>
+        <label class="control"><span>你想拍出什么感觉？（可选）</span><textarea id="coach-goal" aria-label="拍摄意图" maxlength="400" rows="2" placeholder="例如：安静自然，突出人物，同时保留环境氛围"></textarea></label>
+        <p class="coach-privacy">仅发送这张照片的压缩预览（长边 ≤1024 px）、拍摄参数和意图。API 模式经本站服务转发至 OpenAI，key 不入库、不写入方案；服务提供商仍可能按其政策处理数据。Codex CLI 在临时只读任务中运行，完成后清理本应用临时图片；并不代表离线推理。</p>
+        <label class="check"><input id="coach-consent" type="checkbox">我同意发送这张照片和参数，并承担所选 AI 的使用费用</label>
+        <div class="dialog-actions"><button id="coach-run" class="primary">点评这张照片</button><button id="coach-cancel" hidden>取消等待</button></div>
+        <p id="coach-status" role="status" aria-live="polite">尚未发送照片。</p>
+        <div id="coach-result" hidden></div>
+      </details>
     </dialog>
     <dialog id="help-dialog">
       <div class="dialog-head">

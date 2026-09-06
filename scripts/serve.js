@@ -2,6 +2,8 @@ import { createServer } from "node:http";
 import { readFile, readdir } from "node:fs/promises";
 import { dirname, resolve, extname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { makeLocalAI, localRequestAllowed } from "../server/local-ai.js";
+const handleAI = makeLocalAI();
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../site");
 const files = new Set([
   "/index.html",
@@ -30,7 +32,14 @@ const types = {
   ".json": "application/json",
 };
 const server = createServer(async (req, res) => {
+  const port = server.address().port;
+  if (!localRequestAllowed(req, port)) {
+    res.writeHead(403);
+    res.end("Local access only");
+    return;
+  }
   const path = new URL(req.url, "http://localhost").pathname;
+  if (await handleAI(req, res, path, port)) return;
   const file = path === "/" ? "/index.html" : path;
   if (!["GET", "HEAD"].includes(req.method) || !files.has(file)) {
     res.writeHead(404);

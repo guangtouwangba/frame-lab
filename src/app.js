@@ -1,4 +1,5 @@
 import * as T from "three";
+import { createCoach } from "./coach-ui.js";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { ShaderPass } from "three/addons/postprocessing/ShaderPass.js";
@@ -23,6 +24,7 @@ import {
   depthOfField,
 } from "./optics.js";
 const $ = (s) => document.querySelector(s);
+const coach = createCoach();
 let state = { ...defaults },
   currentTab = "camera",
   photos = [],
@@ -753,6 +755,7 @@ function gallery() {
     b.append(img, span);
     b.onclick = () => {
       selected = s;
+      coach.setPhoto(s);
       $("#photo-preview").src = s.url;
       $("#photo-meta").textContent =
         `${s.time} · ${s.w} × ${s.h} · ${cameras[s.state.cameraId].name} + ${lenses[s.state.lensId].name} · ${s.state.focal} mm · f/${s.state.aperture} · 机位 ${s.state.distance.toFixed(2)} m · 对焦 ${s.state.focus.toFixed(2)} m · EV ${s.state.ev} · ${s.state.modelId} · ${environments[s.state.environment].name}`;
