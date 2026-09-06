@@ -17,6 +17,7 @@ await rm(out, { recursive: true, force: true });
 await mkdir(resolve(out, "dist"), { recursive: true });
 for (const path of [
   "index.html",
+  "portrait-light-preview.html",
   "style.css",
   "layout.css",
   "dist/app.js",

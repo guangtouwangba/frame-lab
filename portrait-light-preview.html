@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>人像光影调整成品预览</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        background: #0f1115;
+        color: #f7f3ec;
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100svh;
+        background:
+          radial-gradient(circle at 50% 0%, rgba(229, 215, 191, 0.16), transparent 34rem),
+          #0f1115;
+      }
+
+      main {
+        width: min(100%, 920px);
+        margin: 0 auto;
+        padding: 18px 14px 30px;
+      }
+
+      header {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 4px 2px 14px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(18px, 4.8vw, 26px);
+        font-weight: 680;
+        letter-spacing: 0;
+      }
+
+      .meta {
+        margin: 7px 0 0;
+        color: rgba(247, 243, 236, 0.66);
+        font-size: 13px;
+        line-height: 1.45;
+      }
+
+      .download {
+        flex: 0 0 auto;
+        border: 1px solid rgba(247, 243, 236, 0.2);
+        border-radius: 999px;
+        color: #f7f3ec;
+        padding: 9px 13px;
+        text-decoration: none;
+        font-size: 13px;
+        background: rgba(255, 255, 255, 0.06);
+      }
+
+      .stage {
+        overflow: hidden;
+        border-radius: 8px;
+        background: #171a20;
+        box-shadow: 0 20px 70px rgba(0, 0, 0, 0.35);
+      }
+
+      img {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+
+      .notes {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .note {
+        min-height: 62px;
+        border: 1px solid rgba(247, 243, 236, 0.12);
+        border-radius: 8px;
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.045);
+      }
+
+      .note strong {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 13px;
+      }
+
+      .note span {
+        color: rgba(247, 243, 236, 0.68);
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      @media (max-width: 680px) {
+        main {
+          padding: 12px 10px 22px;
+        }
+
+        header {
+          display: block;
+        }
+
+        .download {
+          display: inline-block;
+          margin-top: 10px;
+        }
+
+        .notes {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <h1>人像光影调整成品预览</h1>
+          <p class="meta">2026-09-06 · 背景高光压低，脸部补光，衣服暗部保留层次。</p>
+        </div>
+        <a class="download" href="/assets/reviews/portrait-light-retouch-2026-09-06.png" download>
+          下载原图
+        </a>
+      </header>
+
+      <section class="stage" aria-label="调整后的人像成品图">
+        <img
+          src="/assets/reviews/portrait-light-retouch-2026-09-06.png"
+          alt="一张户外湖边逆光人像的光影调整成品图"
+        />
+      </section>
+
+      <section class="notes" aria-label="调整重点">
+        <div class="note"><strong>背景</strong><span>压住天空和水面高光，减少抢眼发白。</span></div>
+        <div class="note"><strong>脸部</strong><span>局部补光，让肤色更干净但不假白。</span></div>
+        <div class="note"><strong>暗部</strong><span>黑衣和外套恢复纹理，保留自然对比。</span></div>
+        <div class="note"><strong>轮廓</strong><span>保留发丝逆光，降低高光溢出感。</span></div>
+      </section>
+    </main>
+  </body>
+</html>
