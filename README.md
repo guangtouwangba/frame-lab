@@ -1,5 +1,7 @@
 # FRAME LAB · 人像摄影练习室
 
+[Open studio / 在线练习](https://frame-lab-kohl.vercel.app) · [Source](https://github.com/guangtouwangba/frame-lab)
+
 A small, open-source 3D portrait photography studio that runs in your browser. Practice framing, shot sizes, camera perspective, depth of field, and lighting, then capture the result as a PNG.
 
 一个浏览器里的三维人像摄影练习室：移动机位、调整焦距和景别、观察光影，再按快门保存照片。无需账号、API key 或后端服务。
